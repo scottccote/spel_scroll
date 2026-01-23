@@ -6,8 +6,10 @@ public class FloatLiteral extends NumericLiteral<Float> {
     public FloatLiteral(Float value) {
         super(value, DataTypeEnum.FLOAT);
     }
+
+
     @Override
-    public void negate() {
-        setNegative(getValue().floatValue() * -1f);
+    public Float getNegatedValue() {
+        return super.getValue() * -1f;
     }
 }

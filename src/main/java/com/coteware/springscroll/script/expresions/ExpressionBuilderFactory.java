@@ -49,7 +49,7 @@ public class ExpressionBuilderFactory {
 
 
     public <T extends ExpressionBuilder>  T addDeclarationSpec(DeclarationSpec declarationSpec) {
-        return (T) this.expressionBuilder.addDeclarationSpect(declarationSpec);
+        return (T) this.expressionBuilder.addDeclarationSpec(declarationSpec);
     }
 //
     public void reset() {

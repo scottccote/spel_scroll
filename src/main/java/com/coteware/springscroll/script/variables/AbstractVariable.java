@@ -1,11 +1,12 @@
 package com.coteware.springscroll.script.variables;
 
 import com.coteware.springscroll.script.declarations.DataTypeEnum;
+import com.coteware.springscroll.script.literals.Literal;
 
 public class AbstractVariable<T> implements Variable<T>{
     private final String name;
     private final DataTypeEnum dataTypeEnum;
-    private T value;
+    private Literal<T> value;
 
     public AbstractVariable(String name, DataTypeEnum dataTypeEnum) {
         this.name = name;
@@ -23,12 +24,12 @@ public class AbstractVariable<T> implements Variable<T>{
     }
 
     @Override
-    public T getValue() {
+    public Literal<T> getValue() {
         return value;
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(Literal<T> value) {
         this.value = value;
     }
 }

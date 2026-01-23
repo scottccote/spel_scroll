@@ -239,6 +239,7 @@ literal
     : CHAR_STRING
     | numeric
     | numeric_negative
+    | boolean
     ;
 
 numeric
@@ -248,6 +249,10 @@ numeric
 
 numeric_negative
     : MINUS_SIGN numeric
+    ;
+
+boolean
+    : BOOLEAN
     ;
 
 quoted_string
@@ -367,7 +372,9 @@ APPROXIMATE_NUM_LIT : FLOAT_FRAGMENT ('E' ('+' | '-')? (FLOAT_FRAGMENT | [0-9]+)
 
 // Rule #--- <CHAR_STRING> is a base for Rule #065 <char_string_lit> , it incorporates <character_representation>
 // and a superfluous subtoken typecasting of the "QUOTE"
-CHAR_STRING: '\'' (~('\'' | '\r' | '\n') | '\'' '\'' | NEWLINE)* '\'';
+//CHAR_STRING: '\'' (~('\'' | '\r' | '\n') | '\'' '\'' | NEWLINE)* '\'';
+// modified to use double quotes as SpEL internally uses the sinqle quote for strings
+CHAR_STRING: '"' (~('"' | '\r' | '\n') | '"' '"' | NEWLINE)* '"';
 
 SPACES: [ \t\r\n]+ -> channel(HIDDEN);
 

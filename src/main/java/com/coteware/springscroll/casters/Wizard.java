@@ -1,6 +1,5 @@
 package com.coteware.springscroll.casters;
 
-import com.coteware.springscroll.examples.example02.config.LoadDatabase;
 import com.coteware.springscroll.script.ScopeMemory;
 import com.coteware.springscroll.script.Scroll;
 import com.coteware.springscroll.script.UnitResult;

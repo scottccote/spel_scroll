@@ -9,7 +9,7 @@ public class IntegerLiteral extends NumericLiteral<Integer> {
     }
 
     @Override
-    public void negate() {
-        setNegative(getValue().intValue() * -1);
+    public Integer getNegatedValue() {
+        return super.getValue() * -1;
     }
 }

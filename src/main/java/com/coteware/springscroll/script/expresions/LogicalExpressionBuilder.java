@@ -1,21 +1,45 @@
 package com.coteware.springscroll.script.expresions;
 
 import com.coteware.springscroll.script.declarations.DeclarationSpec;
+import com.coteware.springscroll.script.exceptions.ScrollAssemblyException;
 
 public class LogicalExpressionBuilder implements
         ExpressionBuilder,UnaryLogicalOperation,LogicalOperation {
-    private boolean unaryOperation = false;
-    private boolean isNull = false;
-    private boolean isNot = false;
-    private LogicalExpression expression = new LogicalExpression();
+    private boolean isBuilt;
+    private boolean unaryOperation;
+    private boolean isNull;
+    private boolean isNot;
+    private LogicalExpression expression;
 
-    public LogicalExpressionBuilder unaryOperation() {
+    public LogicalExpressionBuilder() {
+        init();
+    }
+
+    private void init() {
+        isBuilt = false;
+        unaryOperation = false;
+        isNull = false;
+        isNot = false;
+        expression = new LogicalExpression();
+    }
+
+    @Override
+    public UnaryLogicalOperation unaryOperation() {
         this.unaryOperation = true;
         return this;
     }
 
     @Override
     public Expression build() {
+
+        if (this.expression.declarationSpecMap.isEmpty()) {
+            throw new ScrollAssemblyException("You must specify at least one declaration specification");
+        }
+
+        if (!this.unaryOperation) {
+            throw new ScrollAssemblyException("You must specify a unary operation");
+        }
+
         if (this.isNull) {
             expression.setNull();
         }
@@ -24,6 +48,8 @@ public class LogicalExpressionBuilder implements
             expression.setNot();
         }
 
+        this.isBuilt=true;
+
         return expression;
     }
 
@@ -31,7 +57,7 @@ public class LogicalExpressionBuilder implements
 
     @Override
     public void reset() {
-        this.expression = new LogicalExpression();
+        init();
     }
 
     @Override
@@ -41,14 +67,14 @@ public class LogicalExpressionBuilder implements
     }
 
     @Override
-    public LogicalOperation addDeclarationSpect(DeclarationSpec declarationSpec) {
+    public LogicalOperation addDeclarationSpec(DeclarationSpec declarationSpec) {
         this.expression.add(declarationSpec);
         return this;
     }
 
     @Override
-    public UnaryLogicalOperation setIsNot(boolean isNot) {
-        this.isNot = true;
+    public LogicalOperation setIsNot(boolean isNot) {
+        this.isNot = isNot;
         return this;
     }
 

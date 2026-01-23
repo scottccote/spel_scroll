@@ -2,9 +2,9 @@ package com.coteware.springscroll.script.declarations;
 
 import com.coteware.springscroll.script.variables.Variable;
 
-public class AbstractDeclarationSpec implements DeclarationSpec {
+public abstract class AbstractDeclarationSpec<T> implements DeclarationSpec<T> {
     protected final String name;
-    protected Variable variable;
+    protected Variable<T> variable;
     protected final DataTypeEnum dataTypeEnum;
 
     public AbstractDeclarationSpec(String name, DataTypeEnum dataTypeEnum) {
@@ -17,7 +17,7 @@ public class AbstractDeclarationSpec implements DeclarationSpec {
     }
 
     @Override
-    public void setVariable(Variable variable) {
+    public void setVariable(Variable<T> variable) {
         if (!name.contentEquals(variable.getName())) {
             throw new IllegalArgumentException("Variable name mismatch");
         }
@@ -30,7 +30,7 @@ public class AbstractDeclarationSpec implements DeclarationSpec {
     }
 
     @Override
-    public Variable getVariable() {
+    public Variable<T> getVariable() {
         return variable;
     }
 }

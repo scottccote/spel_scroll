@@ -1,10 +1,11 @@
 package com.coteware.springscroll.script.variables;
 
 import com.coteware.springscroll.script.declarations.DataTypeEnum;
+import com.coteware.springscroll.script.literals.Literal;
 
 public interface Variable<T> {
     String getName();
     DataTypeEnum getDataTypeEnum();
-    T getValue();
-    void setValue(T value);
+    Literal<T> getValue();
+    void setValue(Literal<T> value);
 }

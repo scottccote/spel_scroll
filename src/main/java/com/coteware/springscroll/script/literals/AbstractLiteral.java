@@ -2,9 +2,9 @@ package com.coteware.springscroll.script.literals;
 
 import com.coteware.springscroll.script.declarations.DataTypeEnum;
 
-public class AbstractLiteral<T> implements Literal<T> {
-    private T value;
-    private DataTypeEnum dataTypeEnum;
+public abstract class AbstractLiteral<T> implements Literal<T> {
+    private final T value;
+    private final DataTypeEnum dataTypeEnum;
 
     public AbstractLiteral(T value, DataTypeEnum dataTypeEnum) {
         this.value = value;
@@ -12,10 +12,13 @@ public class AbstractLiteral<T> implements Literal<T> {
     }
 
     public T getValue() {
-        return value;
+            return value;
     }
 
     public DataTypeEnum getDataType() {
         return dataTypeEnum;
     }
+
+
+
 }

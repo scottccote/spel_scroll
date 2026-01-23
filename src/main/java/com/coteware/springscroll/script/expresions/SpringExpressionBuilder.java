@@ -12,7 +12,7 @@ public class SpringExpressionBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public SpringExpressionBuilder addDeclarationSpect(DeclarationSpec declarationSpec) {
+    public SpringExpressionBuilder addDeclarationSpec(DeclarationSpec declarationSpec) {
         this.expression.add(declarationSpec);
         return this;
     }

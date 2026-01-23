@@ -3,15 +3,15 @@ package com.coteware.springscroll.script.expresions;
 import com.coteware.springscroll.script.declarations.DeclarationSpec;
 import com.coteware.springscroll.script.literals.Literal;
 
-public interface ExpressionBuilder {
-    Expression build();
+public interface ExpressionBuilder<R,S extends Literal<R>, T extends Expression<R,S>> {
+    Expression<R,S> build();
     void reset();
-    default <T extends ExpressionBuilder> T addLiteral(Literal literal) {
-        return (T) this;
+    default <Q> ExpressionBuilder<R,S,T> addLiteral(Literal<Q> literal) {
+        return this;
     }
 
-    default <T extends ExpressionBuilder> T addDeclarationSpect(DeclarationSpec declarationSpec) {
-        return (T) this;
+    default <Q> ExpressionBuilder<R,S,T> addDeclarationSpec(DeclarationSpec<Q> declarationSpec) {
+        return this;
     }
 
 }

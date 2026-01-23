@@ -21,6 +21,7 @@ import com.coteware.springscroll.script.statements.Statement;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class ScrollListener extends SpelScriptBaseListener {
 
@@ -49,8 +50,11 @@ public class ScrollListener extends SpelScriptBaseListener {
         return Optional.ofNullable(this.currentBlock);
     }
 
-    private <T extends Statement> T currentStatement() {
-        return (T) this.blockStack.peek().currentStatement();
+    private <T extends Statement> Optional<T> currentStatement() {
+        if (this.blockStack.peek().getStatements().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of((T) this.blockStack.peek().currentStatement());
     }
 
     private ExpressionBuilderFactory expressionBuilder() {
@@ -80,9 +84,25 @@ public class ScrollListener extends SpelScriptBaseListener {
     }
 
     @Override
+    public void enterUnit_statement(SpelScriptParser.Unit_statementContext ctx) {
+        addMsg("enterUnit_statement");
+        unitName = ctx.block_name().getText();
+    }
+
+    @Override
     public void exitUnit_statement(SpelScriptParser.Unit_statementContext ctx) {
         addMsg("exitUnit_statement");
-        unitName = ctx.block_name().getText();
+        if (ctx.getParent() instanceof SpelScriptParser.ScrollContext) {
+
+            Optional<Block> maybeBlock = getCurrentBlock();
+            if (maybeBlock.isPresent()) {
+                UnitStatement unitStatement = new UnitStatement(maybeBlock.get(),unitName);
+                scroll.add(unitStatement);
+            } else {
+                throw new ScrollAssemblyException("Could not find current block");
+            }
+
+        }
     }
 
     @Override
@@ -95,10 +115,7 @@ public class ScrollListener extends SpelScriptBaseListener {
             block = new Block(new ScopeMemory(scopeMemory()));
         }
         blockStack.push(block);
-        if (ctx.getParent() instanceof SpelScriptParser.ScrollContext) {
-            UnitStatement unitStatement = new UnitStatement(block,unitName);
-            scroll.add(unitStatement);
-        }
+
     }
 
     @Override
@@ -159,7 +176,11 @@ public class ScrollListener extends SpelScriptBaseListener {
     @Override
     public void enterAssignment_statement(SpelScriptParser.Assignment_statementContext ctx) {
         addMsg("enterAssignment_statement");
+        Optional<Statement> maybeStatement = currentStatement();
         AssignmentStatement assignmentStatement = new AssignmentStatement();
+        if (maybeStatement.isPresent()) {
+            maybeStatement.get().setNextSequenceStatement(assignmentStatement);
+        }
         addStatement(assignmentStatement);
     }
 
@@ -168,9 +189,14 @@ public class ScrollListener extends SpelScriptBaseListener {
         addMsg("exitAssignment_statement");
         String variableName = ctx.getChild(0).getText();
         Optional<DeclarationSpec> maybeDeclarationSpec = scopeMemory().get(variableName);
-        AssignmentStatement assignmentStatement = currentStatement();
+        Optional<AssignmentStatement> maybeAssignmentStatement = currentStatement();
+
+        if (!maybeAssignmentStatement.isPresent()) {
+            throw new ScrollAssemblyException("expected assignment statement");
+        }
+
         if (maybeDeclarationSpec.isPresent()) {
-            assignmentStatement.setDeclarationSpec(maybeDeclarationSpec.get());
+            maybeAssignmentStatement.get().setDeclarationSpec(maybeDeclarationSpec.get());
         } else {
             throw new ScrollAssemblyException("no declaration found for variable " + variableName);
         }
@@ -179,6 +205,10 @@ public class ScrollListener extends SpelScriptBaseListener {
     @Override
     public void enterPrint_statement(SpelScriptParser.Print_statementContext ctx) {
         PrintStatement printStatement = new PrintStatement();
+        Optional<Statement> maybeStatement = currentStatement();
+        if (maybeStatement.isPresent()) {
+            maybeStatement.get().setNextSequenceStatement(printStatement);
+        }
         addStatement(printStatement);
     }
 
@@ -245,7 +275,15 @@ public class ScrollListener extends SpelScriptBaseListener {
                 }
             }
         }
-        currentStatement().add(expressionBuilder.build());
+
+        Supplier<ScrollAssemblyException> assemblyExceptionSupplier = new Supplier<ScrollAssemblyException>() {
+            @Override
+            public ScrollAssemblyException get() {
+                return new ScrollAssemblyException("");
+            }
+        };
+
+        currentStatement().orElseThrow(assemblyExceptionSupplier).add(expressionBuilder.build());
     }
 
     @Override
@@ -253,7 +291,13 @@ public class ScrollListener extends SpelScriptBaseListener {
         addMsg("exitExpression");
         if (isLiteralExpression(ctx)) {
             Expression literalExpression = expressionBuilder().build();
-            currentStatement().add(literalExpression);
+            Supplier<ScrollAssemblyException> assemblyExceptionSupplier = new Supplier<ScrollAssemblyException>() {
+                @Override
+                public ScrollAssemblyException get() {
+                    return new ScrollAssemblyException("");
+                }
+            };
+            currentStatement().orElseThrow(assemblyExceptionSupplier).add(literalExpression);
         }
         expressionBuilder().reset();
     }
@@ -302,7 +346,7 @@ public class ScrollListener extends SpelScriptBaseListener {
             String variableName = ctx.getChild(0).getText();
             Optional<DeclarationSpec> maybeDeclaration = scopeMemory.get(variableName);
             if (maybeDeclaration.isPresent()) {
-                expressionBuilder().useLogicalExpression().logicalOperation().addDeclarationSpect(maybeDeclaration.get());
+                expressionBuilder().useLogicalExpression().logicalOperation().addDeclarationSpec(maybeDeclaration.get());
             } else {
                 throw new ScrollAssemblyException("no declaration found for variable " + variableName);
             }

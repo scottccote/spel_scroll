@@ -1,17 +1,17 @@
 package com.coteware.springscroll.script;
 
-import com.coteware.springscroll.script.statements.Block;
+import com.coteware.springscroll.spel.SpelService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Scroll {
     private List<UnitStatement> units = new ArrayList<>();
+    private final SpelService spelService;
 
-    public Scroll() {
-
+    public Scroll(SpelService spelService) {
+        this.spelService = spelService;
     }
 
     public void add(UnitStatement unit) {
@@ -22,4 +22,10 @@ public class Scroll {
         return Collections.unmodifiableList(units);
     }
 
+    public void execute() {
+        units.forEach(unit -> {
+            unit.setSpelService(spelService);
+            unit.execute();
+        });
+    }
 }
